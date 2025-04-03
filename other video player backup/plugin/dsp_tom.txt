@@ -1,0 +1,153 @@
+TomSteady Automatic Gain Controller
+
+This plug-in will control y'er volume to prevent nasty clipping and low volumes.  It's 
+perdy.  This plugin has fine volume control, it adjusts automagically so there is no setup 
+so don't bother trying. (close button ain't working neither)
+
+The purpose of this plugin is to save those poor precious winamp listener ears!
+Save the EARS!
+
+Tom,
+tomstdenis@yahoo.com
+(Source available on demand)
+
+History
+
+V1.0 	-- Initial Copy :-)
+
+V1.01 	-- Added variable volume control and improved the adaptive filter code
+	-- sounds much cooler
+	-- can handle 8-bit samples now :-)
+
+V1.02	-- Fixed a silly bug where the initial setting of the volume bar is wrong.
+	-- fixed a bug where volumes could become negative.
+	-- Added a feature to ingore samples too quiet.  This stops the filter from 
+	amplifying too strongly.
+	-- Slightly smoother volume slides
+	-- Variable smoothness volume slides
+	-- changed the layout
+
+V1.03	-- fixed a bug where certain songs could not avoid clipping somehow.  Also I reduced
+	the number of re-samplings that are performed.  So on super loud music it may still
+	clip but will require much less cpu time.
+	-- added some error checking to avoid outputing to formats that this plugin can't
+	use.  (Just in case :) )
+
+V1.04	-- Now saves settings (including position) in a .INI file under C:\
+	-- Uses more accurate re-sampling (i.e I round up as required)
+	-- Filter for high/low-frequency sounds.  Basically it treats high frequency
+	buffers as louder then they are.  It also treats low frequency buffers as slightly 
+	quieter then they are.  Not a huge change but a bit more precise.  Of course this 
+	filtering is optional :-o
+	
+	For the curious I use a 2^N point Discrete Cosine Transform to get the spectral engergy.  It uses about 4%
+	more cpu time on my Athlon 800mhz so I doub't it will cause a problem on many computers.  For the most point
+	2^N = 2048 since Winamp sends 1152 sample buffers at 44khz.  I downmix (internally) stereo samples since I won't 
+	be changing volume in stereo (the volume control affects both channels).  Generally if you set the LP band to
+	35% it responds well.  IF you find you have a lot of treble music lower it, or if you have alot of bassy stuff
+	leave it really.  Generally just play with it a bit.  There is not a huge diff (+- 10% volume at the most) between
+	this freq filter and not.  It's mainly for a finer volume control.
+
+	Be careful not to set the sensitivity too high or the AGC functions may not work as desired.  Generally leave it
+	around '4' and it should work fine.
+
+V1.05	-- Changed the dialog around some
+	-- Added a Stereo Echo function.  It echos the audio and can mix stereo samples as well.  If you set the separation
+	to 100% the echos are isolated to their original channels.  As you change the separation towards 0% the echo
+	will cross-mix into other channels.  At 50% the echo in each channel comes 50/50 from the two original channels.
+	I would leave the echo volume at 100% but you can change it if you like.  Leave the delay at around 35ms for
+	normal usage.  You can raise it above 100ms for fun though :-)
+	
+V1.06	-- Can we say AGC'ed echoer?  Hehehe.  This echoer can tune the echo volume so that loud songs don't get droned
+	out by a stupid echo.  I have never seen this before in any other echoer so Tom scores a point :-).  Note that 
+	due to stereo mixing the AGC for the echo is different (works the same way in practice) then the master AGC.
+	Basically audio rendering works like this [INPUT] -> [ECHO] -> [AGC] -> [CONTROL] -> [OUTPUT].  Where the control
+	and AGC steps can loop upto 256 times if the input is oversampled.  
+	-- Switched the AGC code around to save a teensy eensy bit of space.
+	-- Added a feature (non-optional) that if 128 frames in a row have their volume increase the rate of change in the
+	volume increases four-fold.  This is spiffy for really really quiet music since it doesn't take three years for
+	the volume to get at an appreciatable level.
+	-- Added a HQ mixer which basically manipulates the sound internally with more precision.  It doesn't make bad audio 
+	sound good.  It helps good audio stay good.  It requires about 5% more cpu time on my Athlon :-).  The HQ mixer is 
+	used to try and avoid aliasing sound effects.  See when you work with integers (which is the NQ mixer) things like
+	'5/2' doesn't give 2.5 it gives 2.  If you had to multiply by say '3' afterwards you would get 6 instead of 7.5.  
+	Since '4/2=2' both samples '4' and '5' would give the same output in this case.  That is called aliasing and 
+	generally isn't terribly noticeable but some audio phreaks may care.  If you can honestly tell the difference
+	please email me!  I actually examined the output in HQ and NQ mode with Goldwave (wave1(n) - wave2(n)) and I had
+	to maximize the volume to actually hear the difference.  There was a difference of a maximum of 0.0125 or 1.25%
+	between the two.  This suggests the loss of precision is not that high.  Perhaps when burning CD's is the only
+	realistic use of the HQ mixer.  (Note:  The sound ain't bad in NQ mode anyways :-) )
+	-- The HQ mixer right now is only usefull if you use the echoer as well.  Otherwise it should produce relatively 
+	identical results as compared to the NQ mixer (the NQ mixer does rounding to avoid aliasing in the AGC).
+	-- This version of the plugin requires about a 1.5MB of ram.  Sorry but it's needed!
+
+V1.07	-- For reasons unknown the position of the window is saved in odd places once in a while.  So I simply just
+	reset the position if it's off bounds.
+	-- Cleaned up part of the code to make it easier to maintain.
+	-- Fixed a AGC bug.  The volume is suppose to start at 100% but wouldn't if you used a smoothness other then 7.
+
+V1.08	-- MMX mixing in normal mode for slow Cyrix/AMD cpu's.
+	-- 3DNOW mixing for slow K6-ii's :-o
+
+V1.09	-- Fully optimized the Normal Quality Echoer to remove divisions from the main loop requires three multiplies, two 
+	additions and two bit shifts per sample. (Used to have two divisions per sample)
+	-- Fixed the echoer sampler to get the sample volume right.  This should increase the fidelity of the audio 
+	somewhat (if noticeable).
+	-- Rescheduled the MMX code for AMD-K6/PIII series of processors that have multiple MMX units.  Essentially
+	I delay access to multiplication results by two addition cycles so that there should not be any stalls.
+	-- Changed the echoer around to save memory (saves 393,216 bytes of memory)
+
+V1.10	-- Added a short-term predictor (like the Branch Prediction Tables in a PII) to try and model
+	the audio correctly.  It should help increase the fidelity of music that has been previously normalized.
+	-- It only moves the filter volume up/down iff clipping occured or the move was predicted.  This should help 
+	smoothen out volume slides and avoid jumping +/- a few percent due to things like drum beats, etc.
+
+V1.11	-- Cleaned up the source code a bunch... Of course you can't see that as a user but rest assured I'm happier :-)
+	-- Added an option to use a non-linear echo (takes no extra cpu time really) instead of the first order linear
+	one I hacked together.  The nonlinear echo doesn't work well with a delay less than 50ms
+	-- Cleaned up the User Interface by disabling non-active components
+	-- Fixed a bug where if you start playing a mono file the echoer is not disabled
+
+V1.12	-- Fixed a bug where you turn off/on the echo and the echo buffer is still filled.
+	-- Change the maximal delay when the filter volume is too high.  Should remove some clickage people were 
+	experiencing.
+	-- Changed the stack allocated from 1MB downto 16kb to save memory.
+	-- Removed the frequency filtering since it blew anyways.
+	-- Cleaned up the source quite a bit.  It's available on my website too!
+	
+V1.13	-- Can now close the bloody window.
+V1.13a	-- Cosmetic Change.  I forgot to remove a label from the window...
+V1.13b	-- Fixed the "prevent clipping" code to adapt to the volume smoothness setting
+V1.13c	-- Added a "Dynamic Range" counter that shows the percentage of the volume span
+	used.  I.e 100% means the samples in a buffer range from the lowest possible to
+	highest possible.  It's linear so with a 16-bit song 50% means there is really only
+	15-bits of information used.  If the percent falls below 13% the song may sound
+	bad.  If you hear hiss and such on quiet songs this will indicate that a low
+	dynamic range is likely the cause.
+	-- Fixed a bug with the echo pannel, should now disable/enable the options 
+	correctly.
+	-- Fixed timing problems with echoer.
+
+V1.2	-- Fixed the echoer feedback to be scaled properly.
+	-- Fixed the MMX AGC code to round samples
+	-- Optimized the MMX AGC code.  Now runs at 3.5 cycles/sample on my Athlon.
+	-- Fixed the integer AGC code to round samples properly
+	-- Same fix to the HQ code
+	-- Interleaved the 3DNOW AGC code hopefully to increase speed, heck the routines
+	are plenty fast as it is now.
+	-- Added a "audio level" to show off the avg volume over the past few blocks
+	-- Added sub-sample accuracy to the NQ echoer.
+	-- Optimized the HQ mixer to remove all divisions in the AGC/echoer
+	-- Nothing else.
+
+V1.3	-- added a voice bandpass filter (using my free biquad code).  This will basically
+	allow the passage of about 100hz to 5khz.  It's a BPF filter with a center
+	of 500hz and a bandwidth of 0.5 octaves.  Most of the energy is +/- 250 hz from
+	the center though.  The idea is to remove bad harmonics from low bitrate speech
+	audio such as George Carlin stuff :-)
+	-- wowswer
+
+V1.4	-- Added the ability to not boost the audio.  Now it will compress only if you 
+	want.
+	-- Made the config window not popup by default.  Go into the plugin settings 
+	and click on it's config thingy to get the window now.

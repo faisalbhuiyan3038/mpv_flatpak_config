@@ -1,0 +1,4 @@
+start=8.875593
+pause=yes
+saturation=1
+vf=vapoursynth=file=%55%C:\Users\Admin\AppData\Roaming\SVP4\scripts\8a0037ca.py:buffered-frames=4:concurrent-frames=15

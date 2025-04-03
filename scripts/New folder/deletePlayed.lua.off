@@ -1,0 +1,36 @@
+local utils = require 'mp.utils'
+local current_file = nil
+local playback_finished = false
+
+function delete_current_file()
+    if current_file then
+        local args = {
+            'powershell', '-Command',
+            string.format([[Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%s', 'OnlyErrorDialogs', 'SendToRecycleBin')]], current_file)
+        }
+        mp.command_native({name = "subprocess", args = args, playback_only = false, capture_stdout = true})
+        mp.osd_message("Deleted: " .. current_file)
+    end
+end
+
+function on_file_loaded(event)
+    current_file = mp.get_property("path")
+    playback_finished = false
+end
+
+function on_end_file(event)
+    if event.reason == "eof" then
+        playback_finished = true
+        -- Schedule the deletion for the next tick to ensure it happens after the new file is loaded
+        mp.add_timeout(0, function()
+            if mp.get_property("path") ~= current_file and playback_finished then
+                delete_current_file()
+            end
+        end)
+    else
+        playback_finished = false
+    end
+end
+
+mp.register_event("file-loaded", on_file_loaded)
+mp.register_event("end-file", on_end_file)

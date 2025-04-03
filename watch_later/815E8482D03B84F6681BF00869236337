@@ -1,0 +1,6 @@
+start=467.717302
+pause=yes
+mute=yes
+saturation=1
+vf=vapoursynth=file=%55%C:\Users\Admin\AppData\Roaming\SVP4\scripts\1960e179.py:buffered-frames=4:concurrent-frames=15
+ab-loop-a=11.611716

@@ -1,0 +1,9 @@
+start=4085.498000
+pause=yes
+volume=97.000000
+gamma=1
+brightness=-7
+contrast=7
+saturation=7
+vf=vapoursynth=file=%55%C:\Users\Admin\AppData\Roaming\SVP4\scripts\9c46a3a3.py:buffered-frames=4:concurrent-frames=15
+sid=1

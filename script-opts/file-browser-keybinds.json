@@ -1,0 +1,4 @@
+{
+    "key": "ALT+m",
+    "command": ["script-binding", "browse-files"]
+}

@@ -1,1 +1,22 @@
-/memo-history.log
+# MPV history logs
+memo-history.log
+history.log
+watch_later/
+
+# Backup files created by the update scripts
+*.backup
+*.bak
+
+# Thumbnail cache
+thumbs_*
+cache/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*~
+.vscode/
